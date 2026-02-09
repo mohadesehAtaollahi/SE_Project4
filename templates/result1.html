@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+
+<h2>Initial Gender Detection Result</h2>
+
+<div class="result-box">
+    System Prediction: {{ result }}
+</div>
+
+<p>Is this result correct?</p>
+
+<a class="btn" href="{% url 'detector:form2' %}">
+    No, run detailed test
+</a>
+</div>
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <div class="success-message">
+        <h2>Security Verified!</h2>
+        <p>Your answer was correct. Here is your password reset code:</p>
+        
+        <div class="code-container">
+            <div class="code-display">
+                {{ reset_code }}
+            </div>
+            <p class="code-hint">This code will expire in 10 minutes</p>
+        </div>
+        
+        <div class="instructions">
+            <h3>Next Steps:</h3>
+            <ol>
+                <li>Copy the code above</li>
+                <li>Click the button below</li>
+                <li>Paste the code on the next page</li>
+                <li>Set your new password</li>
+            </ol>
+        </div>
+        
+        <div class="actions">
+            <a href="{% url 'enter_reset_code' %}" class="btn primary-btn">
+                Continue to Next Step
+            </a>
+        </div>
+        
+        <div class="warning">
+             <strong>Important:</strong> Do not share this code with anyone.
+        </div>
+    </div>
+</div>
+
+{% endblock %}

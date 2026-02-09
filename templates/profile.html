@@ -1,0 +1,228 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container profile-container">
+    <div class="profile-header">
+        <h2>Welcome {{ request.user.username }}</h2>
+        <p class="profile-status">You are logged in.</p>
+        <p class="profile-email">Email: {{ request.user.email }}</p>
+        {% if is_admin %}
+        <p><strong>Status:</strong>
+            {% if user.is_superuser %}
+                <span class="badge badge-superuser">Super Admin</span>
+            {% elif user.is_staff %}
+                <span class="badge badge-staff">Staff</span>
+            {% endif %}
+        {% endif %}
+        </p>
+        <div class="profile-actions">
+        <a href="{% url 'change_password' %}" class="btn btn-primary">
+            Change Password
+        </a>
+        {% if is_admin %}
+            <a href="/admin/auth/user/" target="_blank" class="btn btn-admin-secondary">
+            Manage Users
+        </a>
+        {% endif %}
+    </div>
+    </div>
+
+
+    <!-- Section for Gender Detection Results -->
+    <div class="results-section">
+        <h3>Your Gender Detection Results</h3>
+
+        {% if has_results %}
+            <div class="test-results">
+                <!-- Form 1 Results -->
+                <div class="result-card {% if gender_result.form1_result %}completed{% else %}not-taken{% endif %}">
+                    <h4>Form 1 Test</h4>
+                    {% if gender_result.form1_result %}
+                        <div class="result-details">
+                            <p><strong>Score:</strong> {{ gender_result.form1_score|floatformat:2 }}</p>
+                            <p><strong>Detected Gender:</strong>
+                                <span class="gender-badge {{ gender_result.form1_result|lower }}">
+                                    {{ gender_result.form1_result }}
+                                </span>
+                            </p>
+                            <p><strong>Last Taken:</strong> {{ gender_result.updated_at|date:"F d, Y H:i" }}</p>
+                        </div>
+                    {% else %}
+                        <div class="result-details">
+                            <p class="no-result">Not taken yet</p>
+                        </div>
+                    {% endif %}
+                    <a href="{% url 'detector:form1' %}" class="btn btn-small">
+                        {% if gender_result.form1_result %}Retake Test{% else %}Take Test{% endif %}
+                    </a>
+                </div>
+
+                <!-- Form 2 Results -->
+                <div class="result-card {% if gender_result.form2_result %}completed{% else %}not-taken{% endif %}">
+                    <h4>Form 2 Test</h4>
+                    {% if gender_result.form2_result %}
+                        <div class="result-details">
+                            <p><strong>Score:</strong> {{ gender_result.form2_score|floatformat:2 }}</p>
+                            <p><strong>Detected Gender:</strong>
+                                <span class="gender-badge {{ gender_result.form2_result|lower }}">
+                                    {{ gender_result.form2_result }}
+                                </span>
+                            </p>
+                            <p><strong>Last Taken:</strong> {{ gender_result.updated_at|date:"F d, Y H:i" }}</p>
+                        </div>
+                    {% else %}
+                        <div class="result-details">
+                            <p class="no-result">Not taken yet</p>
+                        </div>
+                    {% endif %}
+                    <a href="{% url 'detector:form2' %}" class="btn btn-small">
+                        {% if gender_result.form2_result %}Retake Test{% else %}Take Test{% endif %}
+                    </a>
+                </div>
+
+                <!-- Combined Results (if both tests are taken) -->
+                {% if gender_result.combined_result %}
+                <div class="result-card combined-result">
+                    <h4>Final Combined Result</h4>
+                    <div class="result-details">
+                        <p class="final-gender">
+                            <strong>{{ gender_result.combined_result }}</strong>
+                        </p>
+                        <p><small>Based on analysis of both tests</small></p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Test History -->
+            {% if all_results|length > 1 %}
+            <div class="test-history">
+                <h4>Test History</h4>
+                <div class="history-table-container">
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Form 1</th>
+                                <th>Form 2</th>
+                                <th>Combined</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for result in all_results %}
+                            <tr>
+                                <td>{{ result.created_at|date:"M d, Y" }}</td>
+                                <td>
+                                    {% if result.form1_result %}
+                                        {{ result.form1_result }} ({{ result.form1_score|floatformat:1 }})
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if result.form2_result %}
+                                        {{ result.form2_result }} ({{ result.form2_score|floatformat:1 }})
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                                <td>{{ result.combined_result|default:"-" }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+
+        {% else %}
+            <div class="no-results">
+                <p class="no-results-message">You haven't taken any gender detection tests yet.</p>
+                <div class="test-options">
+                    <p>Get started with one of our tests:</p>
+                    <div class="test-buttons">
+                        <a href="{% url 'detector:form1' %}" class="btn btn-primary">Take Form 1 Test</a>
+                        <a href="{% url 'detector:form2' %}" class="btn btn-secondary">Take Form 2 Test</a>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="home-actions">
+        <h3>Quick Actions</h3>
+        <div class="action-buttons">
+            <a class="btn btn-action" href="{% url 'detector:form1' %}">
+                <span class="icon">📋</span>
+                Start Gender Detection
+            </a>
+            <a class="btn btn-action" href="{% url 'detector:form2' %}">
+                <span class="icon">🔬</span>
+                Alternative Test
+            </a>
+            <a class="btn btn-action" href="{% url 'logout' %}">
+                <span class="icon">🚪</span>
+                Logout
+            </a>
+        </div>
+    </div>
+
+    <!-- User Stats (optional) -->
+    {% if has_results %}
+<div class="user-stats">
+    <h3>Test Status</h3>
+    <div class="stats-grid">
+        <!-- تست ۱ -->
+        <div class="stat-card {% if gender_result.form1_result %}completed{% else %}pending{% endif %}">
+            <span class="stat-icon">
+                {% if gender_result.form1_result %}
+                    <i class="fas fa-check-circle"></i>
+                {% else %}
+                    <i class="fas fa-clock"></i>
+                {% endif %}
+            </span>
+            <span class="stat-number">Test 1</span>
+            <span class="stat-label">
+                {% if gender_result.form1_result %}
+                    Completed
+                {% else %}
+                    Not Taken
+                {% endif %}
+            </span>
+        </div>
+
+        <!-- تست ۲ -->
+        <div class="stat-card {% if gender_result.form2_result %}completed{% else %}pending{% endif %}">
+            <span class="stat-icon">
+                {% if gender_result.form2_result %}
+                    <i class="fas fa-check-circle"></i>
+                {% else %}
+                    <i class="fas fa-clock"></i>
+                {% endif %}
+            </span>
+            <span class="stat-number">Test 2</span>
+            <span class="stat-label">
+                {% if gender_result.form2_result %}
+                    Completed
+                {% else %}
+                    Not Taken
+                {% endif %}
+            </span>
+        </div>
+
+        <!-- آخرین فعالیت -->
+        <div class="stat-card activity">
+            <span class="stat-icon">
+                <i class="fas fa-history"></i>
+            </span>
+            <span class="stat-number">Last Activity</span>
+            <span class="stat-label">
+                {{ gender_result.updated_at|timesince }} ago
+            </span>
+        </div>
+    </div>
+</div>
+{% endif %}
+</div>
+{% endblock %}
